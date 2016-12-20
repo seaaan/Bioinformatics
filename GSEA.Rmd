@@ -1,7 +1,11 @@
 ---
 title: "Gene set enrichment analysis"
-output: github_document
+output: 
+   github_document: 
+      toc: true
+      toc_depth: 2
 ---
+
 ```{r, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(message = FALSE)
@@ -207,7 +211,7 @@ head(GO_GSEA)
 # set rankings"
 ```
 
-### Roast
+## Roast
 ```{r}
 # Roast is does simulation/rotation based tests for gene sets
 # mroast does multiple sets, whereas roast does just one set (e.g. index[[1]])
@@ -216,7 +220,8 @@ GO_GSEA <- mroast(y = exprs(filtered), index = index,
    design = design, contrast = contrasts)
 head(GO_GSEA)
 ```
-### fGSEA
+
+## fGSEA
 ```{r}
 library(fgsea)
 # The input to fgsea is log fold change values, sorted in ascending order, as 

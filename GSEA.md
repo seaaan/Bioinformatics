@@ -1,6 +1,12 @@
 Gene set enrichment analysis
 ================
 
+-   [Introduction](#introduction)
+-   [2x2 (Fisher's exact) methods](#x2-fishers-exact-methods)
+-   [Camera](#camera)
+-   [Roast](#roast)
+-   [fGSEA](#fgsea)
+
 Introduction
 ------------
 
@@ -316,7 +322,8 @@ head(GO_GSEA)
 # set rankings"
 ```
 
-### Roast
+Roast
+-----
 
 ``` r
 # Roast is does simulation/rotation based tests for gene sets
@@ -328,35 +335,36 @@ head(GO_GSEA)
 ```
 
     ##                                                   NGenes  PropDown
-    ## GO_VIRAL_MEMBRANE                                      2 1.0000000
     ## GO_CORNIFIED_ENVELOPE                                 39 0.9487179
     ## GO_ACETYL_COA_BIOSYNTHETIC_PROCESS                    17 0.0000000
     ## GO_CYTOSOLIC_PROTEASOME_COMPLEX                       15 0.9333333
     ## GO_PROTEASOME_REGULATORY_PARTICLE_BASE_SUBCOMPLEX     20 0.9000000
     ## GO_OLIGOSACCHARIDE_CATABOLIC_PROCESS                  10 0.1000000
-    ##                                                      PropUp Direction
-    ## GO_VIRAL_MEMBRANE                                 0.0000000      Down
-    ## GO_CORNIFIED_ENVELOPE                             0.0000000      Down
-    ## GO_ACETYL_COA_BIOSYNTHETIC_PROCESS                0.9411765        Up
-    ## GO_CYTOSOLIC_PROTEASOME_COMPLEX                   0.0000000      Down
-    ## GO_PROTEASOME_REGULATORY_PARTICLE_BASE_SUBCOMPLEX 0.0000000      Down
-    ## GO_OLIGOSACCHARIDE_CATABOLIC_PROCESS              0.9000000        Up
+    ## GO_KERATINIZATION                                     45 0.8888889
+    ##                                                       PropUp Direction
+    ## GO_CORNIFIED_ENVELOPE                             0.00000000      Down
+    ## GO_ACETYL_COA_BIOSYNTHETIC_PROCESS                0.94117647        Up
+    ## GO_CYTOSOLIC_PROTEASOME_COMPLEX                   0.00000000      Down
+    ## GO_PROTEASOME_REGULATORY_PARTICLE_BASE_SUBCOMPLEX 0.00000000      Down
+    ## GO_OLIGOSACCHARIDE_CATABOLIC_PROCESS              0.90000000        Up
+    ## GO_KERATINIZATION                                 0.02222222      Down
     ##                                                   PValue         FDR
-    ## GO_VIRAL_MEMBRANE                                  0.001 0.001159895
-    ## GO_CORNIFIED_ENVELOPE                              0.001 0.001159895
-    ## GO_ACETYL_COA_BIOSYNTHETIC_PROCESS                 0.001 0.001159895
-    ## GO_CYTOSOLIC_PROTEASOME_COMPLEX                    0.001 0.001159895
-    ## GO_PROTEASOME_REGULATORY_PARTICLE_BASE_SUBCOMPLEX  0.001 0.001159895
-    ## GO_OLIGOSACCHARIDE_CATABOLIC_PROCESS               0.001 0.001159895
+    ## GO_CORNIFIED_ENVELOPE                              0.001 0.001168246
+    ## GO_ACETYL_COA_BIOSYNTHETIC_PROCESS                 0.001 0.001168246
+    ## GO_CYTOSOLIC_PROTEASOME_COMPLEX                    0.001 0.001168246
+    ## GO_PROTEASOME_REGULATORY_PARTICLE_BASE_SUBCOMPLEX  0.001 0.001168246
+    ## GO_OLIGOSACCHARIDE_CATABOLIC_PROCESS               0.001 0.001168246
+    ## GO_KERATINIZATION                                  0.001 0.001168246
     ##                                                   PValue.Mixed FDR.Mixed
-    ## GO_VIRAL_MEMBRANE                                        0.001     0.001
     ## GO_CORNIFIED_ENVELOPE                                    0.001     0.001
     ## GO_ACETYL_COA_BIOSYNTHETIC_PROCESS                       0.001     0.001
     ## GO_CYTOSOLIC_PROTEASOME_COMPLEX                          0.001     0.001
     ## GO_PROTEASOME_REGULATORY_PARTICLE_BASE_SUBCOMPLEX        0.001     0.001
     ## GO_OLIGOSACCHARIDE_CATABOLIC_PROCESS                     0.001     0.001
+    ## GO_KERATINIZATION                                        0.001     0.001
 
-### fGSEA
+fGSEA
+-----
 
 ``` r
 library(fgsea)
@@ -387,19 +395,19 @@ fg %>%
 ```
 
     ##                             pathway         pval       padj         ES
-    ## 1               GO_SKIN_DEVELOPMENT 0.0002063983 0.02391202 -0.8162399
-    ## 2          GO_EPIDERMIS_DEVELOPMENT 0.0002061856 0.02391202 -0.7990252
-    ## 3 GO_EPIDERMAL_CELL_DIFFERENTIATION 0.0002073828 0.02391202 -0.8516500
-    ## 4   GO_KERATINOCYTE_DIFFERENTIATION 0.0002083767 0.02391202 -0.8876360
-    ## 5                 GO_KERATINIZATION 0.0002075981 0.02391202 -0.9519643
-    ## 6          GO_PEPTIDE_CROSS_LINKING 0.0002070393 0.02391202 -0.9344004
+    ## 1               GO_SKIN_DEVELOPMENT 0.0002058884 0.02262184 -0.8162399
+    ## 2          GO_EPIDERMIS_DEVELOPMENT 0.0002055498 0.02262184 -0.7990252
+    ## 3 GO_EPIDERMAL_CELL_DIFFERENTIATION 0.0002031694 0.02262184 -0.8516500
+    ## 4   GO_KERATINOCYTE_DIFFERENTIATION 0.0002044990 0.02262184 -0.8876360
+    ## 5                 GO_KERATINIZATION 0.0002066970 0.02262184 -0.9519643
+    ## 6             GO_CORNIFIED_ENVELOPE 0.0002054232 0.02262184 -0.9699700
     ##         NES nMoreExtreme size
-    ## 1 -2.449594            0  170
-    ## 2 -2.447874            0  203
-    ## 3 -2.421199            0  112
-    ## 4 -2.400265            0   80
-    ## 5 -2.274181            0   37
-    ## 6 -2.255952            0   39
+    ## 1 -2.448374            0  170
+    ## 2 -2.441195            0  203
+    ## 3 -2.422710            0  112
+    ## 4 -2.402845            0   80
+    ## 5 -2.271879            0   37
+    ## 6 -2.254186            0   31
 
 ``` r
 # plot individual pathway
