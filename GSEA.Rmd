@@ -1,8 +1,12 @@
 ---
 title: "Gene set enrichment analysis"
-output: html_document
+output: github_document
 ---
-
+```{r, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(message = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+```
 ## Introduction
 
 This document outlines how to do gene set enrichment analysis and similar techniques. Such procedures are designed to look in your data set for changes in groups of genes ("gene sets") that have been predetermined to be interesting and coregulated. Finding enriched groups of genes can help to make sense of the data. It can also find changes in groups of genes that are too small to find on the level of the individual genes (e.g. the individual genes aren't differentially regulated, but the set of them might be enriched). 
@@ -16,7 +20,7 @@ Resources:
 There are three general approaches to this problem: 
 
 | Approach | Genes used | No difference between... |
-| --- | --- | --- |
+| ------------ | -------- | --------------------------------------------------- |
 | Fisher's exact | Just DEG | ... proportion of DE genes inside and outside set |
 | Competitive null | All | ... genes inside and outside set |
 | Self-contained | Just set | No gene in gene set is DE |   
@@ -70,45 +74,92 @@ tt <- topTable(fit, coef = "RectumMinusVagina", n = Inf, p = 0.05, lfc = 0.5)
 Once you have calculated the differentially expressed *probes*, you need to combine the duplicates. 
 
 ```{r}
-# return the value whose absolute value is greatest, with the correct sign
-get_absolute <- function(logFC) {
-   negative <- abs(min(logFC)) > abs(max(logFC))
-   if (negative) {
-      return(min(logFC))
-   }
-   max(logFC)
-}
-
+# if duplicate probes go in multiple directions, remove that gene
+# otherwise collapse probes to genes
 tt <- tt %>% 
    group_by(ENTREZ_GENE_ID) %>% 
-   summarise(logFC = get_absolute(logFC))
+   mutate(unidirectional = length(unique(logFC < 0)) == 1) %>% 
+   filter(unidirectional) %>% 
+   summarise(Direction = ifelse(logFC < 0, "Down", "Up")[1])
 
-down <- filter(tt, logFC < 0)
-up <- filter(tt, logFC > 0)
+down <- filter(tt, Direction == "Down")
+up <- filter(tt, Direction == "Up")
 ```
 
-There are `nrow(down)` downregulated genes and `nrow(up)` upregulated genes. 
+There are `r nrow(down)` downregulated genes and `r nrow(up)` upregulated genes. 
 
 #### Example 2x2 table
+
+| | In set | Not in set |
+| --------- | --- | --- |
+| Differentially expressed | 33 | 2010 |
+| Not differentially express | 53 | 16755 |
+
+This example table shows that of the 2043 differentially expressed genes, 33 (1.6%) are in the set. In contrast, only 53 (0.3%) of the 16808 non-differentially expressed genes were in the set.  
+
+### Perform Fisher's exact test
+
+It's pretty annoying to extract numbers for the 2x2 table by hand. The function below does it for you from a data frame containing differentially regulated genes, a vector containing the entrez IDs for a gene set, and an expression set  
+
 ```{r}
-all_genes <- unique(fData(filtered)$ENTREZ_GENE_ID)
-all_down <- down$ENTREZ_GENE_ID
-non_down <- all_genes[!(all_genes %in% all_down)]
+fisher <- function(differentially_regulated, gene_set, e_set, 
+      display_table = FALSE) {
+   all_genes <- unique(fData(e_set)$ENTREZ_GENE_ID)
+   all_diff <- differentially_regulated$ENTREZ_GENE_ID
+   non_diff <- all_genes[!(all_genes %in% all_diff)]
+   
+   # remove genes from gene set that aren't expressed in our array
+   # if you don't do this, you need to adjust below in order to 
+   # reflect these genes
+   # Just removing them (as done here) is a questionable thing to do
+   # alternative approach is to assign all the genes in the set not 
+   # expressed in our array to the non differentially expressed, but 
+   # in set group, as here
+   # non_diff_in_set <- gene_set[!(gene_set %in% diff_in_set)] 
+   gene_set <- gene_set[gene_set %in% all_genes]
+      
+   # build the four elements of the 2x2 table
+   diff_in_set <- all_diff[all_diff %in% gene_set]
+   non_diff_in_set <- non_diff[non_diff %in% gene_set]
+   diff_not_in_set <- all_diff[!(all_diff %in% gene_set)]
+   non_diff_not_in_set <- non_diff[!(non_diff %in% gene_set)]
 
-all_set <- Hs.c5[[1]]
-down_in_set <- all_down[all_down %in% all_set]
-non_down_in_set <- non_down[non_down %in% all_set]
-down_not_in_set <- all_down[!(all_down %in% all_set)]
-non_down_not_in_set <- non_down[!(non_down %in% all_set)]
+   # put the number of genes in each of the four elements into matrix form
+   m <- matrix(c(length(diff_in_set), length(non_diff_in_set), 
+      length(diff_not_in_set), length(non_diff_not_in_set)), ncol = 2)
+   
+   # make sure the numbers add up correctly
+   stopifnot(length(diff_in_set) + length(diff_not_in_set) == length(all_diff))
+   stopifnot(length(non_diff_in_set) + length(non_diff_not_in_set) ==
+         length(non_diff))
+   stopifnot(length(diff_in_set) + length(non_diff_in_set) == length(gene_set))
+   
+   if (display_table) {
+      print(m)
+   }
+   
+   # perform the test
+   # alternative = "greater" means we're looking for enrichment of the
+   # differentially expressed genes within the set
+   # could also test for the opposite
+   fisher.test(m, alternative = "greater")
+}
 
-length(down_in_set)
-length(non_down_in_set)
-length(down_not_in_set)
-length(non_down_not_in_set)
+# test down-regulated genes for enrichment in keratinization and brush border
+# we expect keratinization to be enriched in the down-regulated genes (because
+# the rectum is less keratinized than the vagina)
+fisher(down, Hs.c5[["GO_KERATINIZATION"]], filtered)
+fisher(down, Hs.c5[["GO_BRUSH_BORDER"]], filtered)
 
+# test up-regulated genes for enrichment in keratinization and brush border
+# we expect brush border to be enriched in the up-regulated genes (because
+# the brush border is a feature of columnar epithelium (as in the rectum)
+# and not of squamous epithelium as in the vagina)
+fisher(up, Hs.c5[["GO_KERATINIZATION"]], filtered)
+fisher(up, Hs.c5[["GO_BRUSH_BORDER"]], filtered)
 ```
 
-### Camera
+## Camera
 ```{r}
 # GO gene sets
 # Each element of the list is a GO gene set
@@ -167,6 +218,7 @@ head(GO_GSEA)
 ```
 ### fGSEA
 ```{r}
+library(fgsea)
 # The input to fgsea is log fold change values, sorted in ascending order, as 
 # a vector. The name of each element should be the corresponding entrez gene ID
 # To get this, first you have to do a DEG analysis. 
