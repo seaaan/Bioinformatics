@@ -87,8 +87,11 @@ Hs.c5.BP <- Hs.c5[names(Hs.c5) %in% filter(matched, Ontology == "BP")$TermFromMS
 Hs.c5.MF <- Hs.c5[names(Hs.c5) %in% filter(matched, Ontology == "MF")$TermFromMSigDB]
 Hs.c5.CC <- Hs.c5[names(Hs.c5) %in% filter(matched, Ontology == "CC")$TermFromMSigDB]
 
-save(Hs.c5.BP, file = "GOTermMappingsForCamera/Hs.c5.BP.rdata")
-save(Hs.c5.MF, file = "GOTermMappingsForCamera/Hs.c5.MF.rdata")
-save(Hs.c5.CC, file = "GOTermMappingsForCamera/Hs.c5.CC.rdata")
+save(Hs.c5.BP, file = "GOTermMappingsForCamera/Hs.c5.BP.rdata", 
+   compress = "bzip2", compression_level = 9)
+save(Hs.c5.MF, file = "GOTermMappingsForCamera/Hs.c5.MF.rdata", 
+   compress = "bzip2", compression_level = 9)
+save(Hs.c5.CC, file = "GOTermMappingsForCamera/Hs.c5.CC.rdata", 
+   compress = "bzip2", compression_level = 9)
 write.csv(matched, file = "GOTermMappingsForCamera/GOTermMappings.csv", 
    row.names = FALSE)
